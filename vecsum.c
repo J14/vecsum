@@ -18,13 +18,15 @@ void init_random(int *vector);
 
 void *vecsum(void *arg);
 
+void vecshow(int *vec, int tam, char *name);
+
 int main(int argc, char *argv[])
 {
   srand((unsigned) time(NULL));
 
   int rc, begin, end;
   int num_threads;
-  int a[TAM], b[TAM];
+  int a[TAM], b[TAM], c[TAM];
 
   num_threads = atoi(argv[1]);
 
@@ -34,8 +36,6 @@ int main(int argc, char *argv[])
   pthread_t thr[num_threads];
 
   thread_data_t thr_data[num_threads];
-
-  int *c = (int *) malloc(num_threads * sizeof(int));
 
   int tam_sector = TAM / num_threads;
 
@@ -58,27 +58,12 @@ int main(int argc, char *argv[])
     pthread_join(thr[i], NULL);
   }
 
-  printf("A: ");
-  for (int i = 0; i < TAM; ++i) {
-    printf("%d ", a[i]);
-  }
-
-  printf("\nB: ");
-  for (int i = 0; i < TAM; ++i) {
-    printf("%d ", b[i]);
-  }
-
-  printf("\nC: ");
-  for (int i = 0; i < num_threads; ++i) {
-    printf("%d ", c[i]);
-  }
-  printf("\n");
-
-  free(c);
+  vecshow(a, TAM, "A");
+  vecshow(b, TAM, "B");
+  vecshow(c, TAM, "C");
 
   return 0;
 }
-
 
 void init_random(int *vector)
 {
@@ -94,10 +79,19 @@ void *vecsum(void *arg)
   int begin = thr_data->begin_sec;
   int end = thr_data->end_sec;
 
-  thr_data->c[id] = 0;
   for (int i = begin; i < end; ++i) {
-    thr_data->c[id] += thr_data->a[i] + thr_data->b[i];
+    thr_data->c[i] = thr_data->a[i] + thr_data->b[i];
   }
   
   pthread_exit(NULL);
+}
+
+void vecshow(int *vec, int tam, char *name)
+{
+  printf("%s: ", name);
+
+  for (int i = 0; i < tam; ++i) {
+    printf("%4d", vec[i]);
+  }
+  printf("\n");
 }
